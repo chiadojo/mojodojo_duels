@@ -1,0 +1,40 @@
+; The acceptance coin
+; This must be curried into the initiation coin on genesis
+; The initiation coin must then curry the 5 arguments when into MOD_HASH when it is created.
+(mod (
+		PLAYER1_PUZZLEHASH
+		PLAYER1_HASHED_PREIMAGE
+		AMOUNT
+		PLAYER2_PUZZLEHASH
+		PLAYER2_PREIMAGE
+		player1_preimage
+	)
+
+	(include condition_codes.clib)
+
+	(defun calculate_float (player1_preimage PLAYER2_PREIMAGE)
+		(r (divmod (lsh (logxor player1_preimage PLAYER2_PREIMAGE) -236) 10000))
+	)
+
+	(defun payout (PLAYER1_PUZZLEHASH player1_preimage PLAYER2_PUZZLEHASH PLAYER2_PREIMAGE AMOUNT)
+	 	(if (> (calculate_float player1_preimage PLAYER2_PREIMAGE) 5000) 
+			(list  
+				;(list CREATE_COIN PLAYER1_PUZZLEHASH (* 2 AMOUNT))
+				(list CREATE_COIN PLAYER1_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
+				(list RESERVE_FEE 1000000000)
+			)
+			(list  
+				;(list CREATE_COIN PLAYER2_PUZZLEHASH (* 2 AMOUNT))
+				(list CREATE_COIN PLAYER2_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
+				(list RESERVE_FEE 1000000000)
+			)	 	
+		)
+	)
+
+	;main
+	(if (= (sha256 player1_preimage) PLAYER1_HASHED_PREIMAGE)
+		(payout PLAYER1_PUZZLEHASH player1_preimage PLAYER2_PUZZLEHASH PLAYER2_PREIMAGE AMOUNT)
+		(x "Pre-image does not match supplied hash!") 
+	)
+
+)

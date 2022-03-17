@@ -1,0 +1,32 @@
+(mod (
+		ACCEPTANCE_HASH ; Puzzlehash of acceptance coin
+		PLAYER1_PUZZLEHASH
+		PLAYER1_HASHED_PREIMAGE
+		AMOUNT
+		player2_puzzlehash
+		player2_preimage
+	)
+
+    (include condition_codes.clib)
+	(include curry_and_treehash.clib)
+	(include treehash1.clvm)
+
+	; calculate puzzlehash for acceptance coin, currying in the arguments from this coin
+	(defun acceptance-puzzle-hash (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
+   		(puzzle-hash-of-curried-function
+     	ACCEPTANCE_HASH player2_preimage player2_puzzlehash AMOUNT PLAYER1_HASHED_PREIMAGE PLAYER1_PUZZLEHASH
+		)
+	)
+
+	; return puzzlehash for acceptance coin
+	(defun accept_trade (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
+		(list 
+	 		(list CREATE_COIN (acceptance-puzzle-hash ACCEPTANCE_HASH (sha256tree1 PLAYER1_PUZZLEHASH) (sha256tree1 PLAYER1_HASHED_PREIMAGE) (sha256tree1 AMOUNT) (sha256tree1 player2_puzzlehash) (sha256tree1 player2_preimage)) (+ 1000000000 (* 2 AMOUNT)))
+			(list RESERVE_FEE 1000000000)
+		)
+	)
+
+	;main
+	(accept_trade ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
+
+)
