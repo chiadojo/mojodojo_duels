@@ -13,9 +13,9 @@ from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
 
 from drivers.chia_utils import push_tx, get_coin
-from .mojo_dojo_drivers import calculate_acceptance_modhash, create_initial_coin, calculate_acceptance_treehash, \
-    initial_coin_puzzle, acceptance_puzzle
-from .cli_tools import initiation_treehash, acceptance_modhash, initiation_generation, expected_acceptance_puzzlehash
+from .mojo_dojo_drivers import calculate_acceptance_modhash, create_initial_coin, acceptance_puzzle, initial_puzzle
+from .cli_tools import calculate_acceptance_modhash, expected_acceptance_puzzlehash, \
+    calculate_initiation_curry_treehash, calculate_initiation_soln_treehash
 
 INITIATION_CLSP = "initiation.clsp"
 ACCEPTANCE_CLSP = "acceptance.clsp"
@@ -48,12 +48,12 @@ class AllTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(AllTests, self).__init__(*args, **kwargs)
-        self._ACCEPTANCE_MODHASH = acceptance_modhash()
-        self._INITIATION_TREEHASH = initiation_treehash(self._ACCEPTANCE_MODHASH,
+        self._ACCEPTANCE_MODHASH = calculate_acceptance_modhash()
+        self._INITIATION_TREEHASH = calculate_initiation_curry_treehash(self._ACCEPTANCE_MODHASH,
                                                         player1['puzzlehash_str'],
                                                         player1['hashed_preimage_str'],
                                                         amount_str)
-        self._INITIATION_RESULT = initiation_generation(self._ACCEPTANCE_MODHASH,
+        self._INITIATION_RESULT = calculate_initiation_soln_treehash(self._ACCEPTANCE_MODHASH,
                                                         player1['puzzlehash_str'],
                                                         player1['hashed_preimage_str'],
                                                         amount_str,
@@ -89,8 +89,7 @@ class AllTests(unittest.TestCase):
         # Spend and find destination puzzlehash (should = self._INITIATION_RESULT
         spend = CoinSpend(
             coin=coin,
-            puzzle_reveal=initial_coin_puzzle(INITIATION_CLSP,
-                                              acceptance_modhash,
+            puzzle_reveal=initial_puzzle(acceptance_modhash,
                                               player1['puzzlehash'],
                                               player1['hashed_preimage'],
                                               amount),
@@ -133,7 +132,7 @@ class AllTests(unittest.TestCase):
         self.assertEqual(self._ACCEPTANCE_TREEHASH, self._INITIATION_RESULT)
 
     def test_acceptance_treehash(self):
-        self.assertEqual(calculate_acceptance_treehash(
+        self.assertEqual(expected_acceptance_puzzlehash(
             ACCEPTANCE_CLSP,
             player1['puzzlehash'],
             player1['hashed_preimage'],
