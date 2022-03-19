@@ -32,7 +32,7 @@ def player1_create(puzzlehash, hashed_preimage, amount, fee) -> str:
                                      str_to_bytes32(hashed_preimage),
                                      uint64(amount),
                                      uint64(fee))
-    return json.dumps({'coinid': coin.name().hex(),
+    json_data = json.dumps({'coinid': coin.name().hex(),
                        'username': 'na',
                        'coin_parent': coin.parent_coin_info.hex(),
                        'coin_puzzlehash': coin.puzzle_hash.hex(),
@@ -42,6 +42,8 @@ def player1_create(puzzlehash, hashed_preimage, amount, fee) -> str:
                        'amount': amount,
                        'tx_fee': fee
                        })
+    print(json_data)
+    return json_data
 
 
 # Add security

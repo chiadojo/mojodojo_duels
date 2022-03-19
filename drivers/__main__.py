@@ -1,6 +1,5 @@
 from time import sleep
-from drivers.mojo_dojo_drivers import player1_create, player1_check_for_accept, player2_spend, \
-    player1_submit_preimage
+from drivers.mojo_dojo_drivers import player1_create, player1_check_for_accept, player2_spend, player1_submit_preimage
 import os
 import hashlib
 
