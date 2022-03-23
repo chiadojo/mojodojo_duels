@@ -9,23 +9,14 @@ from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_record import CoinRecord
 from chia.types.coin_spend import CoinSpend
 from chia.types.spend_bundle import SpendBundle
-from chia.util.bech32m import decode_puzzle_hash, encode_puzzle_hash
 from chia.util.ints import uint64, uint32
 
 from .chia_utils import deploy_smart_coin, push_tx, get_coin, get_coin_solution
-
-INITIATION_CLSP = "initiation.clsp"
-ACCEPTANCE_CLSP = "acceptance.clsp"
-MATCH_CLSP = "match.clsp"
-
-
-def calculate_acceptance_modhash() -> bytes32:
-    acceptance = load_clvm(ACCEPTANCE_CLSP, package_or_requirement=__name__)
-    return acceptance.get_tree_hash()
+from .clvm_drivers import acceptance_modhash, initial_puzzle, match_puzzle, acceptance_puzzle, match_puzzle
 
 
 def player1_create(puzzlehash: str, hashed_preimage: str, amount: int, fee: int) -> str:
-    coin: Coin = create_initial_coin(calculate_acceptance_modhash(),
+    coin: Coin = create_initial_coin(acceptance_modhash(),
                                      bytes32.fromhex(puzzlehash),
                                      bytes32.fromhex(hashed_preimage),
                                      uint64(amount),
@@ -57,14 +48,12 @@ def create_initial_coin(acceptance_modhash: bytes32,
 
 # Add security
 def player2_match_coin(amount: int, fee: int):
-    mod = load_clvm(MATCH_CLSP, package_or_requirement=__name__)
-    treehash = mod.get_tree_hash()
-    return deploy_smart_coin(treehash, uint64(amount), uint64(fee))
+    return deploy_smart_coin(match_puzzle().get_tree_hash(), uint64(amount), uint64(fee))
 
 
 def player2_spend(coin_data: str, puzzlehash, preimage):
     coin_data = json.loads(coin_data)
-    puzzle = initial_puzzle(calculate_acceptance_modhash(),
+    puzzle = initial_puzzle(acceptance_modhash(),
                             bytes32.fromhex(coin_data['puzzlehash']),
                             bytes32.fromhex(coin_data['hashed_preimage']),
                             uint64(coin_data['amount'])
@@ -84,7 +73,7 @@ def player2_spend(coin_data: str, puzzlehash, preimage):
     print(match_coin)
     match_spend = CoinSpend(
         coin=match_coin,
-        puzzle_reveal=load_clvm(MATCH_CLSP, package_or_requirement=__name__),
+        puzzle_reveal=match_puzzle(),
         solution=Program.to([])
     )
     spend_bundle: SpendBundle = SpendBundle([spend, match_spend], G2Element())
@@ -129,7 +118,8 @@ def player1_calculate_acceptance_coin(coin_data: str, coin_solution: dict):
     return puzzle, targetCoin
 
 
-def player1_submit_preimage(preimage: bytes32, coin_data: str):
+# Changed FROM bytes32
+def player1_submit_preimage(preimage: str, coin_data: str):
     coin_solution = player1_check_for_accept(coin_data)
     print(f"Coin soln: {coin_solution}")
     if coin_solution is None:
@@ -140,7 +130,7 @@ def player1_submit_preimage(preimage: bytes32, coin_data: str):
     spend = CoinSpend(
         coin=acceptance_coin,
         puzzle_reveal=puzzle,
-        solution=Program.to([preimage]).to_serialized_program()
+        solution=Program.to([bytes32.fromhex(preimage)]).to_serialized_program()
     )
     spend_bundle: SpendBundle = SpendBundle([spend], G2Element())
     try:
@@ -153,22 +143,3 @@ def player1_submit_preimage(preimage: bytes32, coin_data: str):
         print(e)
 
 
-def initial_puzzle(acceptance_modhash: bytes32,
-                   player1_puzzlehash: bytes32,
-                   player1_hashed_preimage: bytes32,
-                   amount: uint64
-                   ) -> Program:
-    initiation = load_clvm(INITIATION_CLSP, package_or_requirement=__name__)
-    initiation = initiation.curry(acceptance_modhash, player1_puzzlehash, player1_hashed_preimage, amount)
-    return initiation
-
-
-def acceptance_puzzle(player1_puzzlehash: bytes32,
-                      player1_hashed_preimage: bytes32,
-                      amount: uint64,
-                      player2_puzzlehash: bytes32,
-                      player2_preimage: bytes32):
-    acceptance = load_clvm(ACCEPTANCE_CLSP, package_or_requirement=__name__)
-    acceptance = acceptance.curry(player1_puzzlehash, player1_hashed_preimage, amount, player2_puzzlehash,
-                                  player2_preimage)
-    return acceptance
