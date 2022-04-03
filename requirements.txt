@@ -1,0 +1,3 @@
+blspy~=1.0.9
+chia-blockchain~=1.3.2
+chia-dev-tools

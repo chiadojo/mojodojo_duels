@@ -67,7 +67,7 @@ class AllTests(unittest.TestCase):
                                                         player2['preimage_str'])
 
     def test_acceptance_modhash(self):
-        self.assertEqual(calculate_acceptance_modhash(ACCEPTANCE_CLSP), bytes32.fromhex(self._ACCEPTANCE_MODHASH))
+        self.assertEqual(calculate_acceptance_modhash(), bytes32.fromhex(self._ACCEPTANCE_MODHASH))
 
     # def test_initiation_treehash(self):
     #     self.assertIsNotNone()
@@ -75,7 +75,7 @@ class AllTests(unittest.TestCase):
     def test_create_and_spend_initiation_coin(self):
         acceptance_modhash = calculate_acceptance_modhash(ACCEPTANCE_CLSP)
 
-        coin: Coin = create_initial_coin(INITIATION_CLSP,
+        coin: Coin = create_initial_coin(
                                          acceptance_modhash,
                                          player1['puzzlehash'],
                                          player1['hashed_preimage'],
@@ -89,7 +89,7 @@ class AllTests(unittest.TestCase):
         # Spend and find destination puzzlehash (should = self._INITIATION_RESULT
         spend = CoinSpend(
             coin=coin,
-            puzzle_reveal=initial_puzzle(acceptance_modhash,
+            puzzle_reveal=initial_puzzle(
                                               player1['puzzlehash'],
                                               player1['hashed_preimage'],
                                               amount),
@@ -112,7 +112,7 @@ class AllTests(unittest.TestCase):
 
         spend2 = CoinSpend(
             coin=targetCoin,
-            puzzle_reveal=acceptance_puzzle(ACCEPTANCE_CLSP,
+            puzzle_reveal=acceptance_puzzle(
                                             player1['puzzlehash'],
                                             player1['hashed_preimage'],
                                             amount,
@@ -133,7 +133,6 @@ class AllTests(unittest.TestCase):
 
     def test_acceptance_treehash(self):
         self.assertEqual(expected_acceptance_puzzlehash(
-            ACCEPTANCE_CLSP,
             player1['puzzlehash'],
             player1['hashed_preimage'],
             amount,
