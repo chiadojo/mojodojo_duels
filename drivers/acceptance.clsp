@@ -19,13 +19,13 @@
 	(defun payout (PLAYER1_PUZZLEHASH player1_preimage PLAYER2_PUZZLEHASH PLAYER2_PREIMAGE AMOUNT)
 	 	(if (> (calculate_float player1_preimage PLAYER2_PREIMAGE) 5000) 
 			(list  
-				;(list CREATE_COIN PLAYER1_PUZZLEHASH (* 2 AMOUNT))
-				(list CREATE_COIN PLAYER1_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
+				(list CREATE_COIN PLAYER1_PUZZLEHASH (* 2 AMOUNT))
+				;(list CREATE_COIN PLAYER1_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
 				(list RESERVE_FEE 1000000000)
 			)
 			(list  
-				;(list CREATE_COIN PLAYER2_PUZZLEHASH (* 2 AMOUNT))
-				(list CREATE_COIN PLAYER2_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
+				(list CREATE_COIN PLAYER2_PUZZLEHASH (* 2 AMOUNT))
+				;(list CREATE_COIN PLAYER2_PUZZLEHASH (calculate_float player1_preimage PLAYER2_PREIMAGE))
 				(list RESERVE_FEE 1000000000)
 			)	 	
 		)

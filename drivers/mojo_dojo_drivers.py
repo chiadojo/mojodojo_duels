@@ -14,7 +14,6 @@ from chia.util.ints import uint64, uint32
 from .chia_utils import deploy_smart_coin, push_tx, get_coin, get_coin_solution
 from .clvm_drivers import acceptance_modhash, initial_puzzle, match_puzzle, acceptance_puzzle, match_puzzle
 
-
 def player1_create(puzzlehash: str, hashed_preimage: str, amount: int, fee: int) -> str:
     coin: Coin = create_initial_coin(acceptance_modhash(),
                                      bytes32.fromhex(puzzlehash),
@@ -51,8 +50,7 @@ def player2_match_coin(amount: int, fee: int):
     return deploy_smart_coin(match_puzzle().get_tree_hash(), uint64(amount), uint64(fee))
 
 
-def player2_spend(coin_data: str, puzzlehash, preimage):
-    coin_data = json.loads(coin_data)
+def player2_spend(coin_data: dict, puzzlehash, preimage):
     puzzle = initial_puzzle(acceptance_modhash(),
                             bytes32.fromhex(coin_data['puzzlehash']),
                             bytes32.fromhex(coin_data['hashed_preimage']),
@@ -82,8 +80,7 @@ def player2_spend(coin_data: str, puzzlehash, preimage):
     print(spend_bundle)
 
 
-def player1_check_for_accept(coin_data: str) -> CoinSpend:
-    coin_data = json.loads(coin_data)
+def player1_check_for_accept(coin_data: dict) -> CoinSpend:
     coin_record: CoinRecord = get_coin(bytes32.fromhex(coin_data['coinid']))
     if coin_record is None:
         return None
@@ -100,8 +97,7 @@ def player1_check_for_accept(coin_data: str) -> CoinSpend:
     return {'puzzlehash': p.first().atom.hex(), 'preimage': p.rest().first().atom.hex()}
 
 
-def player1_calculate_acceptance_coin(coin_data: str, coin_solution: dict):
-    coin_data = json.loads(coin_data)
+def player1_calculate_acceptance_coin(coin_data: dict, coin_solution: dict):
     puzzle = acceptance_puzzle(
         bytes32.fromhex(coin_data['puzzlehash']),
         bytes32.fromhex(coin_data['hashed_preimage']),
@@ -119,7 +115,7 @@ def player1_calculate_acceptance_coin(coin_data: str, coin_solution: dict):
 
 
 # Changed FROM bytes32
-def player1_submit_preimage(preimage: str, coin_data: str):
+def player1_submit_preimage(preimage: str, coin_data: dict):
     coin_solution = player1_check_for_accept(coin_data)
     print(f"Coin soln: {coin_solution}")
     if coin_solution is None:
@@ -136,7 +132,6 @@ def player1_submit_preimage(preimage: str, coin_data: str):
     try:
         print(push_tx(spend_bundle))
         print("Submitted the preimage, new coin:")
-        print(spend_bundle.coin_spends[0])
         return spend_bundle.coin_spends[0]
     except Exception as e:
         print("Spend failed :(")
