@@ -76,9 +76,8 @@ Broadcasting spend to network...
 As the blockchain still does not know the preimage of the maker, the player who created the duel is required to `finalise` the duel by submitting their preimage again.
 
 ### Usage
-json_dict     : The JSON variable copied from the Mojo Dojo website.
-payout_address : The string value of the TXCH payout address to be used. e.g "txch1d31.."  
 random         : The random entropy to be used, e.g "hello123"  
+json_dict     : The JSON variable copied from the Mojo Dojo website.
 
 ```angular2html
 >>> finalise_duel("sd97a98s67a8", {"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000}
