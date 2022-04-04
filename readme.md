@@ -28,7 +28,9 @@ fee (optional) : The transactional network fee to be used, default for testnet =
 ### Usage
 ```angular2html
 >>> create_duel("txch1u3dtz4t03ea8jzez6uq5xrgk5qvp4wsevtmtq07wv0ty3zrpdplq87wwa7", "sd97a98s67a8", 0.1)
-Generated preimage: 945b0365661c355034708afb89204ae33517bc33a1bad99a437300b0e41e61c7
+```
+Response:
+```Generated preimage: 945b0365661c355034708afb89204ae33517bc33a1bad99a437300b0e41e61c7
 Creating spend transaction...
 Successfully created coin, printing JSON:
 {"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000}
@@ -45,6 +47,9 @@ random         : The random entropy to be used, e.g "hello123"
 >>> accept_duel({"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000},
 ...             "txch1j6nsqq8faehtyd0ggqvrwzcgxv2vmyysywuuvwrq88n4nvkpq3pqkczlfs",
 ...             "as87d9a7s9d")
+```
+Response:
+```
 Generated preimage: 5529167a65018bf1315a6c8ac2a2658291a0552c6ad8225f81fa90789eb13075
 Creating spend for duel...
 Creating matching wager contribution...
@@ -78,6 +83,9 @@ random         : The random entropy to be used, e.g "hello123"
 ```angular2html
 >>> finalise_duel("sd97a98s67a8", {"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000}
 ... )
+```
+Response:
+```
 Coin soln: {'puzzlehash': '96a70000e9ee6eb235e84018370b083314cd909023b9c6386039e759b2c10442', 'preimage': '5529167a65018bf1315a6c8ac2a2658291a0552c6ad8225f81fa90789eb13075'}
 player1 calculated puzzlehash dbc0a8c26778d486e7614419aa075798aec02925392c2a959477fb9496a12a36
 Used coin value: 101000000000.0
