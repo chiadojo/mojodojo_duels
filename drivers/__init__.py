@@ -35,10 +35,10 @@ def accept_duel(json_dict: dict, payout_address: str, random: str):
     player2_spend(json_dict, address, preimage)
 
 
-def finalise_duel(random: str, coin_data: dict):
+def finalise_duel(random: str, json_data: dict):
     preimage = hashlib.sha256(random.encode()).hexdigest()
-    ret = player1_submit_preimage(preimage, coin_data)
+    ret = player1_submit_preimage(preimage, json_data)
     while ret is None:
         sleep(5)
-        ret = player1_submit_preimage(preimage, coin_data)
+        ret = player1_submit_preimage(preimage, json_data)
     return ret
