@@ -1,17 +1,23 @@
 (mod (
-		ACCEPTANCE_HASH ; Puzzlehash of acceptance coin
-		PLAYER1_PUZZLEHASH
-		PLAYER1_HASHED_PREIMAGE
-		AMOUNT
+		ACCEPTANCE_HASH                     ; Puzzlehash of acceptance coin
+		PLAYER1_PUBKEY                      ; pubkey of initiator
+		PLAYER1_PUZZLEHASH                  ; puzzlehash of initatiors payout address
+		PLAYER1_HASHED_PREIMAGE             ; hashed/protected preimage
+		AMOUNT                              ; amount to duel
 		player2_puzzlehash
 		player2_preimage
+		pkey                                ; public key requesting relief of funds
 	)
 
     (include condition_codes.clib)
 	(include curry_and_treehash.clib)
 	(include treehash1.clvm)
 
+	(defconstant FEE 1000000000)
+	(defconstant DEV_PKEY 0x9461250fe03f4955e3b63fe22d31e6b80e323a80f0c1d076cc5dd1f5eb534ab202bdd41f389c380c37a10a1c88943f40)
+
 	; calculate puzzlehash for acceptance coin, currying in the arguments from this coin
+	; here we need to assert that the input puzzlehash and preimage == what was announced from the the match coin
 	(defun acceptance-puzzle-hash (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
    		(puzzle-hash-of-curried-function
      	ACCEPTANCE_HASH player2_preimage player2_puzzlehash AMOUNT PLAYER1_HASHED_PREIMAGE PLAYER1_PUZZLEHASH
@@ -19,14 +25,24 @@
 	)
 
 	; return puzzlehash for acceptance coin
-	(defun accept_trade (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
-		(list 
-	 		(list CREATE_COIN (acceptance-puzzle-hash ACCEPTANCE_HASH (sha256tree1 PLAYER1_PUZZLEHASH) (sha256tree1 PLAYER1_HASHED_PREIMAGE) (sha256tree1 AMOUNT) (sha256tree1 player2_puzzlehash) (sha256tree1 player2_preimage)) (+ 1000000000 (* 2 AMOUNT)))
-			(list RESERVE_FEE 1000000000)
+	(defun-inline accept_trade (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage FEE )
+		(list
+		    (list CREATE_COIN_ANNOUNCEMENT player2_puzzlehash)
+		    ; TODO: move complexity into the right function
+	 		(list CREATE_COIN (acceptance-puzzle-hash ACCEPTANCE_HASH (sha256tree1 PLAYER1_PUZZLEHASH) (sha256tree1 PLAYER1_HASHED_PREIMAGE) (sha256tree1 AMOUNT) (sha256tree1 player2_puzzlehash) (sha256tree1 player2_preimage)) (+ FEE (* 2 AMOUNT)))
+			(list RESERVE_FEE FEE)
 		)
 	)
 
 	;main
-	(accept_trade ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage)
-
+	(if (any (= DEV_PKEY pkey) (= PLAYER1_PUBKEY pkey))
+	    ; return funds to player1_puzzlehash
+	    (list
+	        (list CREATE_COIN PLAYER1_PUZZLEHASH (+ AMOUNT FEE))
+	        (list AGG_SIG_ME pkey PLAYER1_PUZZLEHASH)
+	        (list RESERVE_FEE FEE)
+	    )
+	    (accept_trade ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage FEE pkey)
+	)
 )
+

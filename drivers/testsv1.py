@@ -13,7 +13,7 @@ from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
 
 from drivers.chia_utils import push_tx, get_coin
-from .mojo_dojo_drivers import calculate_acceptance_modhash, create_initial_coin, acceptance_puzzle, initial_puzzle
+from .mojo_dojo_drivers import acceptance_modhash, create_initial_coin, acceptance_puzzle, initial_puzzle
 from .cli_tools import calculate_acceptance_modhash, expected_acceptance_puzzlehash, \
     calculate_initiation_curry_treehash, calculate_initiation_soln_treehash
 
@@ -73,10 +73,10 @@ class AllTests(unittest.TestCase):
     #     self.assertIsNotNone()
 
     def test_create_and_spend_initiation_coin(self):
-        acceptance_modhash = calculate_acceptance_modhash(ACCEPTANCE_CLSP)
+        acc_modhash = acceptance_modhash()
 
         coin: Coin = create_initial_coin(
-                                         acceptance_modhash,
+                                         acc_modhash,
                                          player1['puzzlehash'],
                                          player1['hashed_preimage'],
                                          amount,

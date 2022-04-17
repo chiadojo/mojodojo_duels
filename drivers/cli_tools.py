@@ -7,7 +7,7 @@ def exec_cmd(cmd: str) -> str:
 
 
 def calculate_acceptance_modhash():
-    return exec_cmd('cdv clsp treehash -i drivers/include drivers/acceptance.clsp').strip('\n')
+    return exec_cmd('cdv clsp treehash -i include acceptance.clsp').strip('\n')
 
 
 def calculate_initiation_curry_treehash(acceptance_modhash: str,
@@ -15,7 +15,8 @@ def calculate_initiation_curry_treehash(acceptance_modhash: str,
                                         player1_hashed_preimage: str,
                                         amount: str):
     clsp = exec_cmd(
-        f"cdv clsp curry -i drivers/include drivers/initiation.clsp -a 0x{acceptance_modhash} -a 0x{player1_puzzlehash} -a 0x{player1_hashed_preimage} -a {amount}")
+        f"cdv clsp curry -i include initiation.clsp -a 0x{acceptance_modhash} -a {player1_puzzlehash} -a {player1_hashed_preimage} -a {amount}")
+    print(clsp)
     return exec_cmd(f"opc -H '{clsp}'").split('\n')[0]
 
 

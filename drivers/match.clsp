@@ -1,1 +1,35 @@
-()
+; Need to be able to recover this coin
+(mod (
+		PUBKEY
+		PUZZLEHASH
+		PREIMAGE
+		MY_AMOUNT
+		initiation_coin_id      ; we could pass this in as a solution, stop it being specific
+	)
+
+    (include condition_codes.clib)
+	(include treehash1.clvm)
+
+	(defconstant FEE 1000000000)
+
+	(defun-inline recover_coin (PUBKEY PUZZLEHASH MY_AMOUNT FEE)
+		(list
+			(list AGG_SIG_ME PUBKEY 0)
+			(list CREATE_COIN PUZZLEHASH (- MY_AMOUNT FEE))
+			(list RESERVE_FEE FEE)
+		)
+	)
+
+	(defun-inline spend_coin (PUBKEY PUZZLEHASH PREIMAGE initiation_coin_id)
+		(list
+			(list AGG_SIG_ME PUBKEY (sha256 PUZZLEHASH PREIMAGE initiation_coin_id))
+		    (list ASSERT_COIN_ANNOUNCEMENT (sha256 initiation_coin_id PUZZLEHASH))
+		)
+	)
+
+	;main
+	(if (= initiation_coin_id 0)
+	    (recover_coin PUBKEY PUZZLEHASH MY_AMOUNT FEE)
+	    (spend_coin PUBKEY PUZZLEHASH PREIMAGE initiation_coin_id)
+	)
+)
