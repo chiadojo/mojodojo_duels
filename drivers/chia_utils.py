@@ -30,7 +30,7 @@ async def get_coin_async(coin_id: bytes32):
         await full_node_client.await_closed()
 
 
-def get_coin(coin_id: str):
+def get_coin(coin_id: bytes32):
     return asyncio.run(get_coin_async(coin_id))
 
 

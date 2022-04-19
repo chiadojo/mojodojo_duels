@@ -38,7 +38,7 @@ def initial_puzzle(acceptance_modhash: bytes32,
 
 def acceptance_puzzle(player1_puzzlehash: bytes32,
                       player1_hashed_preimage: bytes32,
-                      amount: uint64,
+                      amount: int,
                       player2_puzzlehash: bytes32,
                       player2_preimage: bytes32):
     acceptance = load_clvm(ACCEPTANCE_CLSP, package_or_requirement=__name__)

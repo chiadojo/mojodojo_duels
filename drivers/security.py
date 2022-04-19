@@ -22,8 +22,7 @@ class Security:
         return self.pk
 
     # Many obvious improvements here
-    def sign_coin_and_puzzlehash(self, message: bytes, coin_id: bytes):
+    def sign_coin_and_message(self, message: bytes, coin_id: bytes):
         to_sign = message + coin_id + AGG_SIG_ME_ADDITIONAL_DATA
-        print(f"Signing message: {to_sign.hex()}")
         signature = AugSchemeMPL.sign(self.sk, to_sign)
         return signature

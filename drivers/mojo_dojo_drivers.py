@@ -52,6 +52,7 @@ def create_initial_coin(acceptance_modhash: bytes32,
     print(pzl)
     return deploy_smart_coin(pzl.get_tree_hash(), uint64(amount + (fee * 2)), fee)
 
+
 def player1_cancel(coin_data: dict, s: Security):
     puzzle = initial_puzzle(acceptance_modhash(),
                             G1Element.from_bytes(bytes.fromhex(coin_data['pubkey'])),
@@ -61,14 +62,14 @@ def player1_cancel(coin_data: dict, s: Security):
                             )
     solution = Program.to([0, 0, s.get_pk()])
     print("Creating spend for duel...")
-    spend:CoinSpend = CoinSpend(
+    spend: CoinSpend = CoinSpend(
         coin=Coin(bytes32.fromhex(coin_data['coin_parent']),
                   bytes32.fromhex(coin_data['coin_puzzlehash']),
                   uint64(coin_data['coin_amount'])),
         puzzle_reveal=puzzle.to_serialized_program(),
         solution=solution.to_serialized_program()
     )
-    signature = s.sign_coin_and_puzzlehash(
+    signature = s.sign_coin_and_message(
         bytes32.fromhex(coin_data['puzzlehash']),
         bytes32.fromhex(coin_data['coinid'])
     )
@@ -88,13 +89,12 @@ def player1_cancel(coin_data: dict, s: Security):
 
 def player2_match_coin(pubkey: bytes32, puzzlehash: bytes32, preimage: bytes32, amount: int, fee: int):
     mp: Program = match_puzzle(
-       pubkey,
-       puzzlehash,
-       preimage,
-       amount
+        pubkey,
+        puzzlehash,
+        preimage,
+        amount
     )
     return mp, deploy_smart_coin(mp.get_tree_hash(), uint64(amount), uint64(fee))
-
 
 
 def player2_spend(coin_data: dict, s: Security, puzzlehash, preimage):
@@ -106,7 +106,7 @@ def player2_spend(coin_data: dict, s: Security, puzzlehash, preimage):
                             )
     solution = Program.to([bytes32.fromhex(puzzlehash), bytes32.fromhex(preimage), 0])
     print("Creating spend for duel...")
-    spend:CoinSpend = CoinSpend(
+    spend: CoinSpend = CoinSpend(
         coin=Coin(bytes32.fromhex(coin_data['coin_parent']),
                   bytes32.fromhex(coin_data['coin_puzzlehash']),
                   uint64(coin_data['coin_amount'])),
@@ -130,7 +130,7 @@ def player2_spend(coin_data: dict, s: Security, puzzlehash, preimage):
         puzzle_reveal=match_pzl.to_serialized_program(),
         solution=Program.to([spend.coin.name()]).to_serialized_program()
     )
-    signature = s.sign_coin_and_puzzlehash(
+    signature = s.sign_coin_and_message(
         hashlib.sha256(bytes32.fromhex(puzzlehash) + bytes32.fromhex(preimage) + spend.coin.name()).digest(),
         match_coin.name()
     )
@@ -221,5 +221,3 @@ def player2_forfeit(coin_data: dict):
     except Exception as e:
         print("Spend failed :(")
         print(e)
-
-
