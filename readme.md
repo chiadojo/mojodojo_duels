@@ -5,7 +5,7 @@ The only requirement is a synced full-node on testnet10.
 
 ```angular2html
 git clone https://github.com/chiadojo/mojodojo_duels
-cd mojodojo-defi
+cd mojodojo_duels
 python3 -m venv venv
 . venv/bin/activate
 python -m pip install -r requirements.txt
