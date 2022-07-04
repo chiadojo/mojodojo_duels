@@ -9,7 +9,7 @@ from drivers.clvm_drivers import acceptance_modhash, acceptance_puzzle
 
 class AcceptanceCoin:
     initiatior_puzzlehash: bytes32
-    initiator_hashed_preiamge: bytes32
+    initiator_hashed_preimage: bytes32
     amount: int
 
     acceptor_puzzlehash: bytes32
@@ -28,7 +28,7 @@ class AcceptanceCoin:
     ):
         new_coin = AcceptanceCoin()
         new_coin.initiatior_puzzlehash = initiatior_puzzlehash
-        new_coin.initiator_hashed_preiamge = initiator_hashed_preiamge
+        new_coin.initiator_hashed_preimage = initiator_hashed_preiamge
         new_coin.amount = amount
         new_coin.acceptor_puzzlehash = acceptor_puzzlehash
         new_coin.acceptor_preimage = acceptor_preimage
@@ -41,7 +41,7 @@ class AcceptanceCoin:
     def get_puzzle(self):
         return acceptance_puzzle(
             self.initiatior_puzzlehash,
-            self.initiator_hashed_preiamge,
+            self.initiator_hashed_preimage,
             self.amount,
             self.acceptor_puzzlehash,
             self.acceptor_preimage

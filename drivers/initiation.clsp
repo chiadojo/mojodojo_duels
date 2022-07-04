@@ -28,7 +28,6 @@
 	(defun-inline accept_trade (ACCEPTANCE_HASH PLAYER1_PUZZLEHASH PLAYER1_HASHED_PREIMAGE AMOUNT player2_puzzlehash player2_preimage FEE )
 		(list
 		    (list CREATE_COIN_ANNOUNCEMENT player2_puzzlehash)
-		    ; TODO: move complexity into the right function
 	 		(list CREATE_COIN (acceptance-puzzle-hash ACCEPTANCE_HASH (sha256tree1 PLAYER1_PUZZLEHASH) (sha256tree1 PLAYER1_HASHED_PREIMAGE) (sha256tree1 AMOUNT) (sha256tree1 player2_puzzlehash) (sha256tree1 player2_preimage)) (+ FEE (* 2 AMOUNT)))
 			(list RESERVE_FEE FEE)
 		)

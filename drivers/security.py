@@ -23,6 +23,10 @@ class Security:
 
     # Many obvious improvements here
     def sign_coin_and_message(self, message: bytes, coin_id: bytes):
+        print(message.hex())
+        print(coin_id.hex())
+        print(AGG_SIG_ME_ADDITIONAL_DATA.hex())
         to_sign = message + coin_id + AGG_SIG_ME_ADDITIONAL_DATA
+        print(to_sign.hex())
         signature = AugSchemeMPL.sign(self.sk, to_sign)
         return signature

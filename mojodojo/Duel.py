@@ -5,14 +5,17 @@ from chia.cmds.units import units
 from chia.types.spend_bundle import SpendBundle
 from chia.util.bech32m import decode_puzzle_hash
 from time import sleep
-from drivers import Security
 from drivers.chia_utils import push_tx
 import hashlib
+
+from drivers.security import Security
 from mojodojo.InitiationCoin import InitiationCoin
 from mojodojo.MatchCoin import MatchCoin
 from mojodojo.AcceptanceCoin import AcceptanceCoin
 
-# TODO: Chialisp fees, separate optional and gas
+
+# TODO: Chialisp fees, separate optional and gas - this doesn't exist
+# TODO: Option to select wallet
 # TODO: Add ways to check that spends are successful
 # TODO: Add async to everything
 # TODO: Clarification between bytes and bytes32?
@@ -32,13 +35,10 @@ class Duel:
     match_coin: MatchCoin
     acceptance_coin: AcceptanceCoin
 
-    # final_coin: FinalCoin
-
-
     # TODO: Validate JSON when input
     # TODO: Verify JSON when input
     @staticmethod
-    def from_json(json: dict):
+    def from_json(json: dict, initiation_spend: SpendBundle = None):
         new_duel = Duel()
         new_duel.initial_coin = InitiationCoin.load(
             bytes32.fromhex(json['puzzlehash']),
@@ -50,6 +50,7 @@ class Duel:
             bytes32.fromhex(json['coin_puzzlehash']),
             int(json['coin_amount']),
         )
+        new_duel.initial_coin.spendBundle = initiation_spend
         return new_duel
 
     def get_json(self):
@@ -64,10 +65,6 @@ class Duel:
                            'tx_fee': self.initial_coin.tx_fee
                            })
 
-    # payout_address    : The string value of the TXCH payout address to be used. e.g "txch1d31.."
-    # random            : The random entropy to be used, e.g "hello123"
-    # wager             : The integer wager in XCH to be committed to the smart coin, e.g 0.1
-    # fee               : The transactional network fee to be used, default for testnet = 1000000000
     # TODO: add ability to input raw preimage/ hashed preimage
     @staticmethod
     def create_new(pubkey: G1Element, payout_address: str, random: str, wager: float, fee=1000000000):
@@ -81,14 +78,16 @@ class Duel:
             int(units['chia'] * wager),
             int(fee)
         )
-        print("Broadcasting initial coin spend...")
-        new_duel.initial_coin.broadcast()
+        print("Creating initial coin spend...")
+        new_duel.initial_coin.create_coin()
         return new_duel
 
     def recover(self, s: Security):
         recover_spend = self.initial_coin.get_recover_coin_spend()
         signature = self.initial_coin.get_recover_agg_sig(s)
         spend_bundle: SpendBundle = SpendBundle([recover_spend], signature)
+        print("Recovery SpendBundle:")
+        print(spend_bundle.to_json_dict())
         push_tx(spend_bundle)
 
     # TODO: replace security with CLI for Chia keys.
@@ -107,22 +106,34 @@ class Duel:
             self.initial_coin.amount,
             fee
         )
-        self.match_coin.broadcast()
         match_spend = self.match_coin.get_coin_spend(initial_spend.coin.name())
         signature = self.match_coin.get_agg_sig(s, initial_spend.coin.name())
         spend_bundle: SpendBundle = SpendBundle([initial_spend, match_spend], signature)
-        push_tx(spend_bundle)
-        return spend_bundle.to_json_dict()
+        pk = s.sk.__bytes__().hex()
+        print(self.get_json())
+        # print(push_tx(spend_bundle))
+        print(self.initial_coin.spendBundle)
+        return SpendBundle.aggregate([self.initial_coin.spendBundle, self.match_coin.spendBundle, spend_bundle])
 
-    def finalise(self, random: str):
+    def finalise(self, random: str, acceptance_spend_bundle: SpendBundle):
         preimage = bytes32.from_bytes(hashlib.sha256(random.encode()).digest())
-        while not self.initial_coin.is_spent():
-            sleep(5)
-            print("Initial coin not spent, sleeping for 5 seconds")
 
-        # We could try to fetch this directly - if done by the acceptor
-        # i.e if self.match_coin
-        solution = self.initial_coin.get_solution()
+        solution = None
+        if acceptance_spend_bundle is None:
+
+            while not self.initial_coin.is_spent():
+                sleep(5)
+                print("Initial coin not spent, sleeping for 5 seconds")
+
+            solution = self.initial_coin.get_solution()
+
+        else:
+            # print(acceptance_spend_bundle)
+            exit()
+            solution = self.initial_coin.get_solution_from_spend_bundle(acceptance_spend_bundle.coin_spends[1])
+            # print(acceptance_spend)
+            # print(acceptance_spend.coin_spends[1])
+            # print(type(acceptance_spend.coin_spends[1]))
 
         acceptance_coin = AcceptanceCoin.load(
             self.initial_coin.initiator_puzzlehash,
@@ -136,7 +147,12 @@ class Duel:
                                        (self.initial_coin.amount * 2 + self.initial_coin.tx_fee))
         acceptance_spend = acceptance_coin.get_coin_spend(preimage)
         spend_bundle: SpendBundle = SpendBundle([acceptance_spend], G2Element())
-        push_tx(spend_bundle)
+        # print(f"Raw preimage: {preimage.hex()}")
+        # print("Final SpendBundle")
+        # print(spend_bundle)
+        print(acceptance_spend_bundle)
+        print(spend_bundle)
+        return SpendBundle.aggregate([spend_bundle, acceptance_spend_bundle])
 
     # TODO: remove duplicated code
     def force_forfeit(self):

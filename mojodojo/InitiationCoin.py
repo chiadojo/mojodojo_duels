@@ -4,13 +4,16 @@ from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_record import CoinRecord
 from chia.types.coin_spend import CoinSpend
+from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
+from chia.wallet.transaction_record import TransactionRecord
 
-from drivers import Security
-from drivers.chia_utils import deploy_smart_coin, get_coin, get_coin_solution
+from drivers.chia_utils import deploy_smart_coin, get_coin, get_coin_solution, get_signed_tx, push_tx
+from drivers.security import Security
 from mojodojo.AcceptanceCoin import AcceptanceCoin
 
 from drivers.clvm_drivers import initial_puzzle
+
 
 class InitiationCoin:
     initiator_puzzlehash: bytes32
@@ -20,14 +23,20 @@ class InitiationCoin:
     tx_fee: int
 
     coin: Coin
+    spendBundle: SpendBundle
+
+
+    def create_coin(self):
+        # TODO: Replace with individual standard transaction spendbundle
+        tr: TransactionRecord = get_signed_tx(self.get_puzzle().get_tree_hash(),
+                                              uint64(self.amount + (self.tx_fee * 2)),
+                                              self.tx_fee)
+        self.coin = tr.additions[0]
+        self.spendBundle = tr.spend_bundle
 
     # Deploys the coin with the current parameters
     def broadcast(self):
-        # TODO: Replace with individual standard transaction spendbundle
-        self.coin = deploy_smart_coin(self.get_puzzle().get_tree_hash(),
-                                      uint64(self.amount + (self.tx_fee * 2)),
-                                      self.tx_fee
-                                      )
+        push_tx(self.spendBundle)
 
     # Creates a new coin for broadcasting
     # TODO: Must be a better way to do this
@@ -103,6 +112,10 @@ class InitiationCoin:
     def get_solution(self):
         coin_solution = get_coin_solution(self.coin.name(), self.is_spent())
         p = Program.from_serialized_program(coin_solution.solution)
+        return {'puzzlehash': p.first().atom.hex(), 'preimage': p.rest().first().atom.hex()}
+
+    def get_solution_from_spend_bundle(self, cs : CoinSpend):
+        p = Program.from_serialized_program(cs.solution)
         return {'puzzlehash': p.first().atom.hex(), 'preimage': p.rest().first().atom.hex()}
 
     def verify(self):

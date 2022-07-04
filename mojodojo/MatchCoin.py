@@ -4,11 +4,13 @@ from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
+from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
+from chia.wallet.transaction_record import TransactionRecord
 
-from drivers import Security
-from drivers.chia_utils import deploy_smart_coin
+from drivers.chia_utils import deploy_smart_coin, get_signed_tx
 from drivers.clvm_drivers import match_puzzle
+from drivers.security import Security
 
 
 class MatchCoin:
@@ -19,6 +21,15 @@ class MatchCoin:
     tx_fee: int
 
     coin: Coin
+    spendBundle: SpendBundle
+
+    def create_coin(self):
+        # TODO: Replace with individual standard transaction spendbundle
+        print(self.tx_fee)
+        tr: TransactionRecord = get_signed_tx(self.get_puzzle().get_tree_hash(), uint64(self.amount),
+                                              uint64(self.tx_fee))
+        self.coin = tr.additions[0]
+        self.spendBundle = tr.spend_bundle
 
     # TODO: Must be a better way to do this
     @staticmethod
@@ -35,6 +46,8 @@ class MatchCoin:
         new_coin.acceptor_preimage = acceptor_preimage
         new_coin.amount = amount
         new_coin.tx_fee = tx_fee
+
+        new_coin.create_coin()
         return new_coin
 
     def get_puzzle(self):
