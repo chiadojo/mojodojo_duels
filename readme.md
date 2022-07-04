@@ -4,8 +4,8 @@ The dependencies are packaged with PyPi.
 The only requirement is a synced full-node on testnet10.
 
 ```angular2html
-git clone https://github.com/jjackevans/mojodojo-defi
-cd mojodojo-defi
+git clone https://github.com/chiadojo/mojodojo_duels
+cd mojodojo_duels
 python3 -m venv venv
 . venv/bin/activate
 python -m pip install -r requirements.txt
@@ -35,10 +35,10 @@ Creating spend transaction...
 Successfully created coin, printing JSON:
 {"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000}
 ```
-The final line of this starting {"coinid... can now be shared on the MojoDojo website.
+The final line of this starting {"coinid... can now be shared with the user you want to duel against.
 
 ## Accepting a duel
-json_dict     : The JSON variable copied from the Mojo Dojo website.
+json_dict     : The JSON variable copied from the 
 payout_address : The string value of the TXCH payout address to be used. e.g "txch1d31.."  
 random         : The random entropy to be used, e.g "hello123"  
 
@@ -76,8 +76,8 @@ Broadcasting spend to network...
 As the blockchain still does not know the preimage of the maker, the player who created the duel is required to `finalise` the duel by submitting their preimage again.
 
 ### Usage
-random         : The random entropy to be used, e.g "hello123"  
-json_dict     : The JSON variable copied from the Mojo Dojo website.
+random         : The random entropy used to create the duel
+json_dict     : The JSON string generated when creating the duel
 
 ```angular2html
 >>> finalise_duel("sd97a98s67a8", {"coinid": "1db6bfecabce2f82741197d2185b0ba7c1109d9cd606f720097319ff0f1c486c", "coin_parent": "2ebfc01c428e4534b3511a9c8babd539cd37cb45e35801312c1d9608675871ee", "coin_puzzlehash": "1ff86512622362be2d685f371b01e254ec5dbcef3afd49b41372a3f56e525547", "coin_amount": 102000000000, "puzzlehash": "e45ab1556f8e7a790b22d701430d16a0181aba1962f6b03fce63d6488861687e", "hashed_preimage": "1efee26f44f547e6de8b875248f4d35a278171fab46c98ec47a6be6b8253714e", "amount": 100000000000.0, "tx_fee": 1000000000}
